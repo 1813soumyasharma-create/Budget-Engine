@@ -1,0 +1,22 @@
+# BE — Budget Engine .gitignore
+
+# Database (auto-generated on first run)
+db/be_database.db
+db/*.db-shm
+db/*.db-wal
+
+# Node modules
+node_modules/
+
+# Exports folder (generated Excel files)
+exports/
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

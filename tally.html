@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Tally Sync</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <h2 style="margin-bottom: 1.5rem; text-transform: uppercase;">Tally XML Sync</h2>
+
+            <div class="card" style="margin-bottom: 2rem; border-color: var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="color: var(--text-main); text-transform: uppercase;">Background Auto-Sync</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Enable background sync every 5 minutes (requires server active)</p>
+                    </div>
+                    <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                        <input type="checkbox" id="autoSyncToggle" onchange="updateAutoSync(this.checked)" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3748; transition: .4s;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid-cards" style="grid-template-columns: 1fr 1fr;">
+                
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                    <div class="card-title">Push to Tally</div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Pushes all pending unsynced Income and Expense records to Tally via HTTP locally.
+                    </p>
+                    <button class="btn" style="width: 100%; max-width: 200px;" onclick="pushToTally()" id="btnPush">SYNC PENDING</button>
+                    <div id="pushStatus" style="margin-top: 1rem; font-family: var(--font-data); font-size: 0.85rem;"></div>
+                </div>
+
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-color: rgba(0, 212, 170, 0.4);">
+                    <div class="card-title">Pull from Tally</div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Imports Daybook Vouchers from Tally and registers them as new Income/Expense records.
+                    </p>
+                    <button class="btn-outline" style="width: 100%; max-width: 200px;" onclick="pullFromTally()" id="btnPull">IMPORT DATA</button>
+                    <div id="pullStatus" style="margin-top: 1rem; font-family: var(--font-data); font-size: 0.85rem;"></div>
+                </div>
+
+            </div>
+
+            <div class="table-container">
+                <h3 style="padding: 1.5rem 1rem 1rem; color: var(--text-muted); border-bottom: var(--border-thick);">Sync Event Log</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Record Type</th>
+                            <th>Target ID</th>
+                            <th>Voucher No</th>
+                            <th>Status</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script src="js/tally.js"></script>
+</body>
+</html>

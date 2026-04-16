@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Vendor Stock View</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vendor-gradient: linear-gradient(135deg, #2c3e50, #000000);
+        }
+        .vendor-hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--vendor-gradient);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 0 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stock-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .stock-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-teal);
+            box-shadow: 0 10px 30px rgba(13, 202, 240, 0.1);
+        }
+        .stock-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-teal);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stock-card:hover::before {
+            opacity: 1;
+        }
+        .stock-category {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-teal);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .stock-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .stock-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+        .stock-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .stock-price {
+            font-family: var(--font-data);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .stock-unit {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+        .nav-simple {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .badge-out {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="public-body">
+    <div class="main-content">
+        <div class="page-content">
+            <div class="vendor-hero">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Product Catalog</h1>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Browse our premium selection of admixtures and raw materials. Contact us for bulk orders and institutional inquiries.</p>
+            </div>
+
+            <div class="stock-grid" id="stockGrid">
+                <!-- Stock items will be loaded here -->
+                <div style="text-align: center; grid-column: 1/-1; padding: 4rem;">
+                    <div class="loader"></div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Loading catalog...</p>
+                </div>
+            </div>
+
+            <div class="table-container" style="margin-top: 3rem;">
+                <h3 style="padding: 1.5rem 1rem 1rem; color: var(--text-muted); border-bottom: var(--border-thick);">My Recent Orders</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order Date</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <!-- Populated by JS -->
+                        <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer style="padding: 4rem 2rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">
+            &copy; 2024 Valcon Admixture Pvt. Ltd. | All rights reserved.
+        </footer>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <h3>Place Order</h3>
+            <form id="orderForm" class="form-group" style="margin-top: 1.5rem;">
+                <input type="hidden" id="orderStockId">
+                <div class="form-group">
+                    <label>Product</label>
+                    <input type="text" id="orderItemName" disabled style="background: var(--bg-hover);">
+                </div>
+                <div class="form-group">
+                    <label>Unit Price (₹)</label>
+                    <input type="text" id="orderItemPrice" disabled style="background: var(--bg-hover);">
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="orderQty" required min="0.01" step="0.01" value="1" oninput="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Total Estimate (₹)</label>
+                    <div id="orderTotal" class="data-font" style="font-size: 1.2rem; color: var(--accent-teal); padding: 0.5rem 0;">₹0.00</div>
+                </div>
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button type="button" class="btn-outline" onclick="closeOrderModal()">CANCEL</button>
+                    <button type="submit">SUBMIT ORDER</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script>
+        initLayout('vendors');
+
+        async function loadStock() {
+            try {
+                const res = await fetch('/api/stock');
+                const stocks = await res.json();
+                
+                const grid = document.getElementById('stockGrid');
+                if (stocks.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 4rem; color: var(--text-muted);">No products available at the moment.</div>';
+                    return;
+                }
+
+                grid.innerHTML = stocks.map(item => `
+                    <div class="stock-card">
+                        <div class="stock-category">${item.category}</div>
+                        <div class="stock-name">${item.name}</div>
+                        <div class="stock-desc">${item.description || 'Premium quality material for construction projects.'}</div>
+                        <div class="stock-footer">
+                            <div class="stock-price">
+                                ₹${item.price.toLocaleString('en-IN')}
+                                <span class="stock-unit">/ ${item.unit}</span>
+                            </div>
+                            ${item.status === 'out_of_stock' ? '<span class="badge-out">OUT OF STOCK</span>' : `
+                                <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="openOrderModal(${item.id}, '${item.name}', ${item.price})">ORDER</button>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('stockGrid').innerHTML = '<div class="text-red" style="grid-column: 1/-1; text-align: center;">Failed to load product catalog. Please try again later.</div>';
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const res = await apiFetch('/api/orders');
+                const orders = await res.json();
+                const tbody = document.getElementById('orderTableBody');
+                
+                if (orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No orders placed yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = orders.map(o => `
+                    <tr>
+                        <td class="data-font">${new Date(o.order_date).toLocaleDateString()}</td>
+                        <td style="font-weight: 500;">${o.item_name}</td>
+                        <td class="data-font">${o.quantity}</td>
+                        <td class="data-font">₹${o.unit_price.toLocaleString()}</td>
+                        <td class="data-font" style="font-weight: 600;">₹${o.total_amount.toLocaleString()}</td>
+                        <td>
+                            <span class="badge ${getStatusClass(o.status)}">${o.status.toUpperCase()}</span>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'delivered': return 'badge-synced';
+                case 'cancelled': return 'badge-pending'; // Should be red, but using existing classes
+                case 'pending': return 'badge-pending';
+                default: return 'badge-synced';
+            }
+        }
+
+        function openOrderModal(id, name, price) {
+            document.getElementById('orderStockId').value = id;
+            document.getElementById('orderItemName').value = name;
+            document.getElementById('orderItemPrice').value = price;
+            document.getElementById('orderQty').value = 1;
+            calculateTotal();
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        function calculateTotal() {
+            const price = parseFloat(document.getElementById('orderItemPrice').value || 0);
+            const qty = parseFloat(document.getElementById('orderQty').value || 0);
+            document.getElementById('orderTotal').innerText = `₹${(price * qty).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const body = {
+                stock_id: document.getElementById('orderStockId').value,
+                quantity: document.getElementById('orderQty').value
+            };
+
+            try {
+                const res = await apiFetch('/api/orders', {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    closeOrderModal();
+                    loadOrders();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to place order');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // Initialize and load
+        loadStock();
+        loadOrders();
+    </script>
+</body>
+</html>

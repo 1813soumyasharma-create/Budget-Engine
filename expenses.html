@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Expenses</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="text-transform: uppercase;">Expense Records</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-amber" onclick="exportToExcel('expenses')">EXPORT TO EXCEL</button>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <form id="expenseForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="expDate" required>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Description</label>
+                            <input type="text" id="expDesc" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="expCat" required>
+                                <option value="Office">Office</option>
+                                <option value="Travel">Travel</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Other">Other</option>
+                                <option value="Service Maintenance">Service Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" step="0.01" id="expAmt" required>
+                        </div>
+                        <div class="form-group">
+                            <label>GST Rate</label>
+                            <select id="expGstRate">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18">18%</option>
+                                <option value="28">28%</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Vendor / Store</label>
+                            <input type="text" id="expVendor">
+                        </div>
+                        <div class="form-group">
+                            <label>Voucher / Ref</label>
+                            <input type="text" id="expVoucher">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="align-items: flex-end; justify-content: flex-end;">
+                        <div class="form-group" style="flex: 1;">
+                            <div id="calcPreview" style="font-family: var(--font-data); font-size: 0.8rem; color: var(--accent-amber); text-align: right; margin-bottom: 0.5rem;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" id="expSubmitBtn" class="btn-amber">ADD EXPENSE</button>
+                                <button type="button" id="expCancelBtn" class="btn-outline" style="display:none;" onclick="resetForm()">CANCEL</button>
+                            </div>
+                            <input type="hidden" id="editId">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Vendor</th>
+                            <th>Amount</th>
+                            <th>GST%</th>
+                            <th>GST Amt</th>
+                            <th>Total</th>
+                            <th>Voucher</th>
+                            <th>Sync</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/layout.js?v=2.0"></script>
+    <script src="js/expenses.js?v=2.0"></script>
+</body>
+
+</html>

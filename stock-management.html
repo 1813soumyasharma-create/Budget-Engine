@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Stock Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <div class="header-section">
+                <h2 style="text-transform: uppercase;">Stock Management</h2>
+                <button class="btn-primary" onclick="openModal()">+ ADD NEW STOCK</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Price (₹)</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Modal -->
+    <div id="stockModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add New Stock</h3>
+            <form id="stockForm" class="form-group" style="margin-top: 1.5rem;">
+                <input type="hidden" id="stockId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="itemName" required placeholder="e.g. PCE Powder">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="itemCategory" required placeholder="e.g. Raw Material">
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹)</label>
+                        <input type="number" step="0.01" id="itemPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <input type="text" id="itemUnit" placeholder="kg, litre, etc.">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="itemDesc" rows="3" placeholder="Brief description of the product..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="itemStatus">
+                        <option value="active">Active</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button type="button" class="btn-outline" onclick="closeModal()">CANCEL</button>
+                    <button type="submit">SAVE ITEM</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script src="js/stock-management.js"></script>
+</body>
+</html>

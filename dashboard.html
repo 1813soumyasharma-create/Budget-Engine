@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <h2 style="margin-bottom: 1.5rem; text-transform: uppercase;">Overview</h2>
+            
+            <div class="grid-cards">
+                <div class="card">
+                    <div class="card-title">Total Income</div>
+                    <div class="card-value text-teal" id="kpiIncome">₹0.00</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Total Expenses</div>
+                    <div class="card-value text-amber" id="kpiExpenses">₹0.00</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Net Profit</div>
+                    <div class="card-value" id="kpiProfit">₹0.00</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Pending Syncs</div>
+                    <div class="card-value" id="kpiSyncs">0</div>
+                </div>
+            </div>
+
+            <div class="form-section" style="animation-delay: 0.3s;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-muted);">FY Overview</h3>
+                <canvas id="monthlyChart" height="100"></canvas>
+            </div>
+
+            <div class="table-container">
+                <h3 style="padding: 1.5rem 1rem 1rem; color: var(--text-muted); border-bottom: var(--border-thick);">Recent Transactions</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>GST</th>
+                            <th>Tally Sync</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

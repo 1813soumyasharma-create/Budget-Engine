@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Orders Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <div class="header-section">
+                <h2 style="text-transform: uppercase;">Incoming Orders</h2>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Vendor</th>
+                            <th>Firm</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Total (₹)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOrderTableBody">
+                        <!-- Populated by JS -->
+                        <tr><td colspan="8" style="text-align:center; padding:2rem;">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script>
+        initLayout('orders');
+
+        async function loadAllOrders() {
+            try {
+                const res = await apiFetch('/api/orders');
+                const orders = await res.json();
+                const tbody = document.getElementById('adminOrderTableBody');
+                
+                if (orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No orders found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = orders.map(o => `
+                    <tr>
+                        <td class="data-font">${new Date(o.order_date).toLocaleString()}</td>
+                        <td style="font-weight: 600; color: var(--accent-teal);">${o.vendor_name.toUpperCase()}</td>
+                        <td style="font-size: 0.85rem;">${o.firm_name}</td>
+                        <td style="font-weight: 500;">${o.item_name}</td>
+                        <td class="data-font">${o.quantity}</td>
+                        <td class="data-font" style="font-weight: 600;">₹${o.total_amount.toLocaleString()}</td>
+                        <td>
+                            <span class="badge ${getStatusClass(o.status)}">${o.status.toUpperCase()}</span>
+                        </td>
+                        <td>
+                            <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 0.25rem; font-size: 0.75rem; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirm</option>
+                                <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Ship</option>
+                                <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Deliver</option>
+                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancel</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'delivered': return 'badge-synced';
+                case 'cancelled': return 'badge-pending';
+                case 'pending': return 'badge-pending';
+                case 'confirmed': return 'badge-synced';
+                case 'shipped': return 'badge-synced';
+                default: return 'badge-synced';
+            }
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const res = await apiFetch(`/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    loadAllOrders();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to update status');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        loadAllOrders();
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE — Vendor Profiles</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-content">
+            <div class="header-section">
+                <h2 style="text-transform: uppercase;">User Management</h2>
+                <button class="btn-primary" onclick="openUserModal()">+ CREATE NEW USER</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Firm Name</th>
+                            <th>Role</th>
+                            <th>Created On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- Populated by JS -->
+                        <tr><td colspan="5" style="text-align:center; padding:2rem;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Create User Profile</h3>
+            <form id="userForm" class="form-group" style="margin-top: 1.5rem;">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="vUsername" required placeholder="e.g. jdoe_admin">
+                </div>
+                <div class="form-group">
+                    <label>Firm / Company Name</label>
+                    <input type="text" id="vFirmName" required placeholder="e.g. Authorized Vendor Name">
+                </div>
+                <div class="form-group" id="pwdGroup">
+                    <label>Password</label>
+                    <input type="password" id="vPassword" placeholder="Min 6 characters">
+                    <small style="color: var(--text-muted); font-size: 0.7rem;" id="pwdHint">Leave blank to keep existing password when editing.</small>
+                </div>
+                <div class="form-group">
+                    <label>User Role</label>
+                    <select id="vRole" required>
+                        <option value="vendor">Vendor (Restricted Access)</option>
+                        <option value="admin">Admin (Full Access)</option>
+                    </select>
+                </div>
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button type="button" class="btn-outline" onclick="closeUserModal()">CANCEL</button>
+                    <button type="submit">SAVE PROFILE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/layout.js"></script>
+    <script>
+        initLayout('vendors');
+
+        async function loadUsers() {
+            try {
+                const res = await apiFetch('/api/users');
+                const users = await res.json();
+                const tbody = document.getElementById('userTableBody');
+                
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td style="font-weight: 600; color: var(--accent-teal);">${u.username.toUpperCase()}</td>
+                        <td>${u.firm_name || '-'}</td>
+                        <td><span class="badge ${u.role === 'admin' ? 'badge-synced' : 'badge-pending'}">${u.role.toUpperCase()}</span></td>
+                        <td class="data-font">${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick='editUser(${JSON.stringify(u)})'>EDIT</button>
+                                ${u.id !== user.id ? `
+                                    <button class="btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #ef4444;" onclick="deleteUser(${u.id})">DEL</button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function openUserModal(u = null) {
+            const form = document.getElementById('userForm');
+            const title = document.getElementById('modalTitle');
+            form.reset();
+            
+            if (u) {
+                title.innerText = 'Edit User Profile';
+                document.getElementById('userId').value = u.id;
+                document.getElementById('vUsername').value = u.username;
+                document.getElementById('vFirmName').value = u.firm_name || '';
+                document.getElementById('vRole').value = u.role;
+                document.getElementById('vPassword').required = false;
+                document.getElementById('pwdHint').style.display = 'block';
+            } else {
+                title.innerText = 'Create New User';
+                document.getElementById('userId').value = '';
+                document.getElementById('vPassword').required = true;
+                document.getElementById('pwdHint').style.display = 'none';
+            }
+            
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        function editUser(u) {
+            openUserModal(u);
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this profile?')) return;
+            try {
+                const res = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+                if (res.ok) loadUsers();
+                else alert('Failed to delete user');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const body = {
+                username: document.getElementById('vUsername').value,
+                firm_name: document.getElementById('vFirmName').value,
+                role: document.getElementById('vRole').value
+            };
+
+            const pwd = document.getElementById('vPassword').value;
+            if (pwd) body.password = pwd;
+
+            try {
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `/api/users/${id}` : '/api/users';
+                
+                const res = await apiFetch(url, {
+                    method,
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    closeUserModal();
+                    loadUsers();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to save profile');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>
